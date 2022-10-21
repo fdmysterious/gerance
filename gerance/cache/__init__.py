@@ -14,8 +14,6 @@ from typing                    import Dict, List, Tuple
 from gerance.model.requirement import Requirement
 from gerance.model.test        import Test
 
-from gerance.xml import (requirement_file, test_file)
-
 import gerance.views
 
 import logging
@@ -64,7 +62,7 @@ def load(fpath: Path):
         return pickle.load(fhandle)
 
 
-def create(reqs_path: Path, tests_path: Path):
+def create(reqs_path: Path, tests_path: Path, requirement_file_module: module, test_file_module: module):
     reqs_path  = Path(reqs_path )
     tests_path = Path(tests_path)
 
@@ -72,8 +70,8 @@ def create(reqs_path: Path, tests_path: Path):
     log.info(f"- reqs_path:  {reqs_path}"                )
     log.info(f"- tests_path: {tests_path}"               )
 
-    req_list  = list(requirement_file.load_from_dir(reqs_path))
-    test_list = list(test_file.load_from_dir(tests_path))
+    req_list  = list(requirement_file_module.load_from_dir(reqs_path))
+    test_list = list(test_file_module.load_from_dir(tests_path))
 
     return Gerance_Cache(
         req_list        = req_list,

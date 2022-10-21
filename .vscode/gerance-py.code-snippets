@@ -1,0 +1,11 @@
+{
+	"Section": {
+		"scope": "python",
+		"prefix": "Section",
+
+		"body": [
+			"# ----------------------- ${1:Name}",
+			"$0"
+		]
+	}
+}
