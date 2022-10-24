@@ -14,6 +14,7 @@ from gerance.model.test import (
 )
 
 from gherkin_paperwork  import feature_file
+from itertools          import chain
 
 __REG_COVERAGE = re.compile(r"^@covers\.(.*?)(?:\[(.*?)\])?$")
 
@@ -37,17 +38,27 @@ def parse(f_path):
     feature = feature_file.from_file(f_path)
 
     result  = list()
-    def traverse(root, obj):
+    def traverse(root, obj, parent_coverage=None):
         if isinstance(obj, feature_file.Rule) or isinstance(obj, feature_file.Feature):
+            # TODO # Change this default behaviour. Some kind of dependency group for a validation
+            # point should be implemented
+            coverage = None
+            if isinstance(obj, feature_file.Rule):
+                # This should return all non null match objects
+                mt_objs = filter(lambda x: x is not None, map(lambda x: __REG_COVERAGE.match(x.name), obj.tags))
+
+                # Transforms the list of match objects to tuples containing the validation item ID and version
+                coverage = list(map(lambda x: (x.group(1) or None, x.group(2) or None,), mt_objs))
+
             for c in obj.children:
-                yield from traverse(root, c)
+                yield from traverse(root, c, coverage)
 
         elif isinstance(obj, feature_file.Scenario):
             # This should return all non null match objects
             mt_objs = filter(lambda x: x is not None, map(lambda x: __REG_COVERAGE.match(x.name), obj.tags))
 
             # Transforms the list of match objects to tuples containing the validation item ID and version
-            coverage = list(map(lambda x: (x.group(1) or None, x.group(2) or None,), mt_objs))
+            coverage = list(map(lambda x: (x.group(1) or None, x.group(2) or None,), mt_objs)) + (parent_coverage or [])
 
             # Create and return the scenario object
             yield Test(
@@ -61,3 +72,16 @@ def parse(f_path):
             pass
     
     return traverse(feature, feature)
+
+
+def load_from_dir(dir_path: Path):
+    log.info(f"Load gherkin tests from {dir_path}")
+
+    # Check dir_path
+    dir_path = Path(dir_path)
+    if not dir_path.is_dir():
+        raise NotADirectoryError(dir_path)
+
+    # Process all gherkin files
+    # FIXME # Recursive ?
+    return chain.from_iterable(map(parse, dir_path.glob("*.feature")))

@@ -62,7 +62,7 @@ def load(fpath: Path):
         return pickle.load(fhandle)
 
 
-def create(reqs_path: Path, tests_path: Path, requirement_file_module: module, test_file_module: module):
+def create(reqs_path: Path, tests_path: Path, requirement_file_module: any, test_file_module: any):
     reqs_path  = Path(reqs_path )
     tests_path = Path(tests_path)
 

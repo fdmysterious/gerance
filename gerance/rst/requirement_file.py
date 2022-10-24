@@ -9,10 +9,14 @@ import docutils
 import logging
 
 from docutils import nodes
-from docutils import parsers.rst
 from docutils import frontend
-from docutils import transforms.frontmatter
+from docutils import transforms
 from docutils import utils
+
+from docutils.parsers    import rst
+from docutils.transforms import frontmatter
+
+from pathlib  import Path
 
 from gerance.model.requirement import (
     Requirement,
@@ -64,18 +68,18 @@ class ReqHeaderVisitor(nodes.NodeVisitor):
 
 def parse(f_path):
     # Parse document
-    parser   = parsers.rst.Parser()
-    settings = frontend.get_default_settings(parsers.rst.Parser)
+    parser   = rst.Parser()
+    settings = frontend.get_default_settings(rst.Parser)
     document = utils.new_document(str(f_path), settings)
 
     parser.parse(f_path.read_text(), document)
 
     # Apply transforms
-    doc_transform = transforms.frontmatter.DocTitle(document)
+    doc_transform = frontmatter.DocTitle(document)
     doc_transform.apply()
 
     # Find title
-    title_idx = document.first_child_matching_clas(nodes.title)
+    title_idx = document.first_child_matching_class(nodes.title)
     if title_idx is None:
         raise ValueError("No name for requirement")
 
@@ -99,7 +103,7 @@ def parse(f_path):
     return Requirement(
         id      = visitor.req_id,
         name    = req_name,
-        version = visitor.req_version,
+        version = visitor.version,
 
         validation_items = [
             Requirement_Validation_Item(id=visitor.req_id, desc=req_name)
