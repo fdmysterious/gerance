@@ -46,9 +46,11 @@ Status --> Test
 class Delivry {
 	name: String
 	validation_requirements: Set[Tuple[String,String]]
+	proofs: List[Report]
 }
 
 Delivry -. "references" Validation_Item
+Delivry -. "references" Report
 
 note top of Delivry: Each tuple in "coverage" references a Validation_Item id \n and a Requirement version
 
