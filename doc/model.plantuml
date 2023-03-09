@@ -1,0 +1,55 @@
+@startuml
+class Requirement {
+    id: String
+    name: String
+    version: String
+
+    validation_items: List[Validation_Item]
+}
+
+class Validation_Item {
+    id: String
+    desc: Optional[String]
+}
+
+Validation_Item --* Requirement
+
+class Test {
+    id: String
+    name: String
+    version: String
+   
+    coverage: List[Tuple[String,String]]
+}
+
+Test -. "references" Validation_Item
+
+note top of Test: Each tuple in "coverage" references a Validation_Item id \n and a Requirement version
+
+class Report {
+	name: String
+	datetime: DateTime
+
+	results: List[Status]
+}
+
+class Status {
+	desc: Test
+	success: bool
+	log_file: Path
+	exc: Optional[Exception]
+}
+
+Status --* Report
+Status --> Test
+
+class Delivry {
+	name: String
+	validation_requirements: Set[Tuple[String,String]]
+}
+
+Delivry -. "references" Validation_Item
+
+note top of Delivry: Each tuple in "coverage" references a Validation_Item id \n and a Requirement version
+
+@enduml
